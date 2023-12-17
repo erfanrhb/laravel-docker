@@ -1,0 +1,39 @@
+version: "3.7"
+
+services:
+  walletnginx:
+    image: nginx
+    restart: always
+    working_dir: /var/www/html
+    ports:
+      - "8005:80"
+    volumes:
+      - .:/var/www/html
+      - ./.docker/nginx:/etc/nginx/conf.d
+
+  walletweb:
+    build:
+      context: .
+      dockerfile: .docker/php/Dockerfile
+    restart: always
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+
+  walletdb:
+    image: mysql
+    restart: always
+    volumes:
+      - .db:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+
+  walletphpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - "8085:80"
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: walletdb
